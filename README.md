@@ -5,6 +5,12 @@ This is the test example  "Social tournament service"
 
 # Install
 
+## Get project
+
+- `git clone https://github.com/vxdiv/sts.git sts/src/sts`
+
+-  set environment vars $GOROOT  and $GOPATH
+
 ## Install dependency
 
 -  [Docker Compose](https://docs.docker.com/compose/install/)
