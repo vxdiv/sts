@@ -1,0 +1,9 @@
+app:
+  addrs: ""
+  port: "1323"
+db:
+  addrs:    "localhost:27017"
+  timeout:  "1m"
+  database: "sts"
+  username: ""
+  password: ""
