@@ -139,44 +139,59 @@ func (w Winners) PrizeSum() int64 {
 	return sum
 }
 
-func (ts *TournamentService) ProcessResult(tournamentID uint, winners Winners) error {
+type WinnerResult struct {
+	Winners []WinnerPlayer `json:"winners"`
+}
+
+type WinnerPlayer struct {
+	PlayerID string `json:"playerId"`
+	Prize    int64  `json:"prize"`
+}
+
+func (ts *TournamentService) ProcessResult(tournamentID uint, winners Winners) (*WinnerResult, error) {
 	tournament, err := ts.tournaments.FindByID(tournamentID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if tournament.Close {
-		return ErrTournamentAlreadyClose
+		return nil, ErrTournamentAlreadyClose
 	}
 
 	if tournament.Balance < winners.PrizeSum() {
-		return ErrPrizeAmountIsTooLarge
+		return nil, ErrPrizeAmountIsTooLarge
 	}
 
+	winnersResult := &WinnerResult{
+		Winners: make([]WinnerPlayer, 0, 0),
+	}
 	for playerId, prize := range winners {
 		team, ok := tournament.Teams[playerId]
 		if !ok {
 			log.Errorf("Player %v not participate in tournament", playerId)
-			return ErrInvalidWinnerPlayers
+
+			return nil, ErrInvalidWinnerPlayers
 		}
 
 		tournamentCashOut, err := ts.processTeam(team, prize)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		tournament.Balance -= tournamentCashOut
 		if tournament.Balance < 0 {
-			return ErrTournamentBalanceLimitExceeded
+			return nil, ErrTournamentBalanceLimitExceeded
 		}
+
+		winnersResult.Winners = append(winnersResult.Winners, WinnerPlayer{PlayerID: playerId, Prize: prize})
 	}
 
 	tournament.Close = true
 	if err := ts.tournaments.Update(tournament); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return winnersResult, nil
 }
 
 func (ts *TournamentService) processTeam(team *essence.Team, prize int64) (int64, error) {
@@ -197,4 +212,3 @@ func (ts *TournamentService) processTeam(team *essence.Team, prize int64) (int64
 func partPrize(prizePoints, percent int64) int64 {
 	return int64(float64(prizePoints) * float64(percent))
 }
-

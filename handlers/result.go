@@ -39,11 +39,12 @@ func ResultTournament(ctx AppContext) error {
 		return err
 	}
 
-	if err := service.ProcessResult(uint(tournamentID), convertWinners(form.Winners)); err != nil {
+	result, err := service.ProcessResult(uint(tournamentID), convertWinners(form.Winners))
+	if err != nil {
 		return ctx.JSON(http.StatusBadRequest, Error(err))
 	}
 
-	return ctx.JSON(http.StatusOK, "")
+	return ctx.JSON(http.StatusOK, result)
 }
 
 func convertWinners(winners []Winner) services.Winners {
