@@ -198,16 +198,3 @@ func partPrize(prizePoints, percent int64) int64 {
 	return int64(float64(prizePoints) * float64(percent))
 }
 
-func (ts *TournamentService) fundAmountToTeam(team *essence.Team, amount int64) error {
-	if err := ts.players.UpdateBalance(team.Player, amount); err != nil {
-		return err
-	}
-
-	for _, backer := range team.Backers {
-		if err := ts.players.UpdateBalance(backer, amount); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
