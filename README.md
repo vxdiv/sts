@@ -28,4 +28,4 @@ This is the test example  "Social tournament service"
 
 # Usage
 
-- Run application: `/sts`
+- Run application: `./sts`
